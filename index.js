@@ -10,9 +10,7 @@ const request = require('request');
 const schedule = require('node-schedule');
 let schedules = {};
 
-bot.onText(/^(\/start|\/help)$/, msg => {
-  bot.sendMessage(msg.chat.id, 'Este bot manda la palabra del día cuando escribes /palabra. Para recibir la palabra del día cada día, manda /suscribir y /cancelar para cancelar tu suscripción.');
-});
+bot.onText(/^(\/start|\/help)/, msg => bot.sendMessage(msg.chat.id, 'Este bot manda la palabra del día cuando escribes /palabra. Para recibir la palabra del día cada día, manda /suscribir y /cancelar para cancelar tu suscripción.'));
 
 const sendWord = id => {
   request('http://dle.rae.es/srv/wotd', (err, res, body) => {
@@ -24,24 +22,28 @@ const sendWord = id => {
   });
 };
 
-bot.onText(/^\/palabra$/, msg => {
-  sendWord(msg.chat.id);
-});
+bot.onText(/^\/palabra/, msg => sendWord(msg.chat.id));
 
-bot.onText(/^\/suscribir$/, msg => {
-  bot.sendMessage(msg.chat.id, 'Vale, ahora manda la hora');
-});
+bot.onText(/^\/suscribir/, msg => bot.sendMessage(msg.chat.id, 'Vale, ahora manda la hora'));
 
-bot.onText(/^[0-2]?[0-9]:[0-5][0-9]$/, (msg, match) => {
+bot.onText(/[0-2]?[0-9]:[0-5][0-9]/, (msg, match) => {
   const rule = new schedule.RecurrenceRule();
   const colonIndex = match.input.indexOf(':');
   rule.hour = Number(match.input.substr(0, colonIndex));
   rule.minute = Number(match.input.substr(colonIndex + 1));
-  schedules[msg.chat.id] = schedule.scheduleJob(rule, sendWord.bind(null, msg.chat.id));
+  if (schedules[msg.chat.id]) {
+    schedules[msg.chat.id].reschedule(rule);
+  } else {
+    schedules[msg.chat.id] = schedule.scheduleJob(rule, sendWord.bind(null, msg.chat.id));
+  }
   bot.sendMessage(msg.chat.id, 'Vale, el tiempo se ha registrado');
 });
 
-bot.onText(/^\/cancelar$/, msg => {
-  schedules[msg.chat.id].cancel();
-  bot.sendMessage(msg.chat.id, 'Vale, ya no recibirás más palabras del día diarias');
+bot.onText(/^\/cancelar/, msg => {
+  if (schedules[msg.chat.id]) {
+    schedules[msg.chat.id].cancel();
+    bot.sendMessage(msg.chat.id, 'Vale, ya no recibirás más palabras del día diarias');
+  } else {
+    bot.sendMessage(msg.chat.id, 'Ni si quiera te habías suscrito');
+  }
 });
