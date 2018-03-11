@@ -7,6 +7,10 @@
     "start": "node index.js",
     "test": "echo \"Ja das funtzt immer\""
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MatiasConTilde/PalabraDelDiaBot.git"
+  },
   "keywords": [
     "bot",
     "telegram",
@@ -14,6 +18,9 @@
   ],
   "author": "Javi & Matías con tilde",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MatiasConTilde/PalabraDelDiaBot/issues"
+  },
   "dependencies": {
     "node-schedule": "^1.3.0",
     "node-telegram-bot-api": "^0.30.0",
